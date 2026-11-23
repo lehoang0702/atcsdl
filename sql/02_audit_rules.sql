@@ -1,0 +1,27 @@
+WHENEVER SQLERROR EXIT SQL.SQLCODE
+SET DEFINE ON
+
+ALTER SESSION SET CONTAINER = XEPDB1;
+
+DEFINE v_app_user = '&1'
+
+-- 1. Ghi nhận mọi phiên đăng nhập thành công và thất bại (bắt Brute-force KB2: RETURNCODE = 1017)
+AUDIT CREATE SESSION BY ACCESS;
+
+-- 2. Giám sát truy cập/thao tác trên bảng STUDENTS và GRADES (bắt SQLi KB1 & Trích xuất KB4)
+AUDIT SELECT, INSERT, UPDATE, DELETE ON &v_app_user..STUDENTS BY ACCESS;
+AUDIT SELECT, INSERT, UPDATE, DELETE ON &v_app_user..GRADES   BY ACCESS;
+
+-- 3. Giám sát tạo tài khoản, gán quyền/role (bắt Leo thang đặc quyền KB3: CREATE USER, GRANT DBA)
+AUDIT USER BY ACCESS;
+AUDIT ROLE BY ACCESS;
+AUDIT SYSTEM GRANT BY ACCESS;
+AUDIT GRANT ANY PRIVILEGE BY ACCESS;
+AUDIT GRANT ANY ROLE BY ACCESS;
+
+-- 4. Giám sát thay đổi cấu hình kiểm toán & thao tác xóa/sửa bảng đặc quyền cao (bắt KB4)
+AUDIT AUDIT SYSTEM BY ACCESS;
+AUDIT DELETE ANY TABLE BY ACCESS;
+AUDIT UPDATE ANY TABLE BY ACCESS;
+
+EXIT;

@@ -1,0 +1,10 @@
+# Temporary post-attack snapshots
+current_metadata/
+current_info.txt
+current_sha256.txt
+
+# OS & editor artifacts
+.DS_Store
+*.swp
+*.tmp
+*.log

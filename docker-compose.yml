@@ -1,0 +1,29 @@
+services:
+  oracle-xe:
+    image: gvenzl/oracle-xe:21
+    container_name: ${CONTAINER_NAME:-atcsdl-oracle21c}
+    restart: unless-stopped
+    ports:
+      - "${ORACLE_PORT:-1521}:1521"
+    environment:
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD:-OracleAdmin123}
+      APP_USER: ${APP_USER:-UNI_APP}
+      APP_USER_PASSWORD: ${APP_USER_PASSWORD:-UniApp123}
+      BRUTEFORCE_USER: ${BRUTEFORCE_USER:-GV_USER}
+      BRUTEFORCE_PASSWORD: ${BRUTEFORCE_PASSWORD:-oracle123}
+      ORACLE_PDB: ${ORACLE_PDB:-XEPDB1}
+      TZ: Asia/Ho_Chi_Minh
+    volumes:
+      - oracle_data:/opt/oracle/oradata
+      - ./init:/container-entrypoint-initdb.d:ro
+      - ./sql:/opt/sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "healthcheck.sh"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+
+volumes:
+  oracle_data:
+    name: atcsdl_oracle_data

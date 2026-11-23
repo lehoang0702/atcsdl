@@ -1,0 +1,6 @@
+audit_sys_operations|TRUE
+audit_trail|DB, EXTENDED
+log_archive_dest_1|LOCATION=/opt/oracle/oradata/archivelog VALID_FOR=(ALL_LOGFILES,ALL_ROLES) DB_UNIQUE_NAME=XE
+log_archive_format|arch_%t_%s_%r.arc
+log_mode|ARCHIVELOG
+supplemental_log_data_min|YES
