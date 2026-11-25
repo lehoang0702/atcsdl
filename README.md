@@ -20,6 +20,8 @@ Thư mục này triển khai toàn bộ hạ tầng **Thành viên 1 – Hạ t�
   - `export_baseline.sh`: Xuất siêu dữ liệu cơ sở (users, sys privs, role privs, tables, columns, objects, synonyms, audit options, security parameters) ra `baseline_metadata/*.csv`, ghi mốc `CURRENT_SCN` vào `baseline_info.txt`, và tính mã băm SHA-256 vào `baseline_sha256.txt`.
   - `verify_infra.sh`: Kiểm tra tình trạng hoạt động, chế độ `ARCHIVELOG`, `AUDIT_TRAIL`, `DBMS_LOGMNR`, dữ liệu mẫu và xác thực `baseline_sha256.txt`.
 - `baseline_sha256.txt`, `baseline_metadata/`, `baseline_info.txt`: Sản phẩm bàn giao cho Thành viên 3.
+- `docs/BAO_CAO_PHAN_1.md`: Bản nháp nội dung báo cáo Phần 1 (kiến trúc hạ tầng, cấu hình Audit/ARCHIVELOG, Baseline SHA-256) để ghép vào báo cáo chung của nhóm.
+- `.gitattributes`: Cố định định dạng xuống dòng `LF` cho `*.sh`, `*.sql`, `*.csv`, `baseline_sha256.txt` để không bị lỗi script hoặc lệch mã băm khi clone trên Windows.
 
 ---
 
@@ -41,7 +43,7 @@ Thư mục này triển khai toàn bộ hạ tầng **Thành viên 1 – Hạ t�
    ./scripts/verify_infra.sh
    ```
 
-*(Lưu ý: Nếu cần reset làm lại từ đầu, chạy `docker compose down -v` rồi `docker compose up -d`. Nếu TV2/TV3 clone repo này về dựng trên máy khác, **bắt buộc chạy lại `./scripts/export_baseline.sh` trước khi tấn công** để chốt lại `baseline_sha256.txt` và `CURRENT_SCN` khớp với chính container vừa khởi tạo.)*
+*(Lưu ý: Nếu cần reset làm lại từ đầu, chạy `docker compose down -v` rồi `docker compose up -d`. Nếu TV2/TV3 clone repo này về dựng trên máy khác, **bắt buộc chạy lại `./scripts/export_baseline.sh` trước khi tấn công** để chốt lại `baseline_sha256.txt` và `CURRENT_SCN` khớp với chính container vừa khởi tạo. Do chế độ `ARCHIVELOG` sinh log định kỳ, nếu chưa sử dụng ngay nên chạy `docker compose stop` và bật lại bằng `docker compose start` khi thực nghiệm.)*
 
 ---
 
@@ -54,7 +56,7 @@ Thư mục này triển khai toàn bộ hạ tầng **Thành viên 1 – Hạ t�
 | **SID (CDB)** | `XE` | Container Database gốc |
 | **Tài khoản Web SQLi (KB1)** | `UNI_APP` / `UniApp123` | Sở hữu bảng `STUDENTS` và `GRADES`, không có quyền `DBA` |
 | **Tài khoản Brute-force (KB2)** | `GV_USER` / `oracle123` | Dùng profile `LAB_BF_PROFILE` (`FAILED_LOGIN_ATTEMPTS UNLIMITED`), phù hợp chạy Hydra |
-| **Tài khoản quản trị (KB3/KB4)** | `SYSTEM` / `OracleAdmin123` | Dùng nếu mô phỏng leo thang / xóa `SYS.AUD$` / `NOAUDIT` |
+| **Tài khoản quản trị (KB3/KB4)** | `SYSTEM` / `OracleAdmin123` | Dùng cho `CREATE USER`, `GRANT DBA`, `NOAUDIT`. Riêng lệnh `DELETE FROM SYS.AUD$` ở KB4 trong Oracle 21c yêu cầu quyền `SYS AS SYSDBA` (`SYS/OracleAdmin123@localhost:1521/XEPDB1 AS SYSDBA`), nếu chạy bằng `SYSTEM` sẽ nhận lỗi `ORA-02004` (vẫn được ghi vết trong `DBA_AUDIT_TRAIL`). |
 | **Bảng mục tiêu** | `STUDENTS`, `GRADES` | Có `PUBLIC SYNONYM`, truy vấn được cả `STUDENTS` lẫn `UNI_APP.STUDENTS` |
 
 ---
